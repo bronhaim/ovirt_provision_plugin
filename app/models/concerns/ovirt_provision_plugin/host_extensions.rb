@@ -18,7 +18,7 @@ module OvirtProvisionPlugin
               logger.info "OvirtProvisionPlugin:: Running ovirt_host_callback on \"#{self.get_ovirt_host_name}\""
               host_id = self.get_ovirt_host_id
               client = self.get_ovirt_client
-              client.reinstall_host("#{host_id}")
+              client.reinstall_host("#{host_id}", self.override_firewall)
               logger.info "OvirtProvisionPlugin:: Sent reinstall command successfully"
             rescue OVIRT::OvirtException
               logger.warn "OvirtProvisionPlugin:: Failed to reinstall host. Trying again (#{max_tries})"
@@ -54,6 +54,17 @@ module OvirtProvisionPlugin
         return true
       end
       return false
+    end
+
+    def override_firewall
+      begin
+	override_firewall = parameters.find_by_name("override_firewall_rules").value
+	if override_firewall?
+	   return True
+	end
+      rescue
+	return False
+      end
     end
 
     def get_ovirt_client
